@@ -1,0 +1,9 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="app_message_frame_height">32dp</dimen>
+    <dimen name="top_message_margin">120dp</dimen>
+    <dimen name="top_card_top_margin">32dp</dimen>
+    <dimen name="app_message_text_size">24sp</dimen>
+    <dimen name="text_in_cardView_padding">16dp</dimen>
+    <dimen name="card_weekday_text_size">20sp</dimen>
+</resources>
