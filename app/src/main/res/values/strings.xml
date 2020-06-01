@@ -26,4 +26,7 @@
     <!-- Card headlines -->
     <string name="notifications_schedule_headline">Your notification schedule:</string>
     <string name="title_activity_add_to_schedule">New notification</string>
+
+    <!-- Buttons -->
+    <string name="submit_btn">Submit</string>
 </resources>
