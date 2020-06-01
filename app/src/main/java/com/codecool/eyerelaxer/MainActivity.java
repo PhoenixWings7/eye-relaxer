@@ -11,6 +11,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,13 +23,13 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.add_new_notification_time_fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {startAddToScheduleActivity();
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-            }
-        });
+        fab.setOnClickListener(view -> startAddToScheduleActivity());
+
+        Intent intentIncoming = getIntent();
+
+        if (isScheduleChanged(intentIncoming)) {
+            setPickedNotificationSchedule(intentIncoming);
+        }
     }
 
     @Override
@@ -53,8 +54,38 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void startAddToScheduleActivity() {
+    protected boolean isScheduleChanged(Intent intent) {
+        String[] daysChecked = intent.getStringArrayExtra(AddToScheduleActivity.EXTRA_DAYS_CHECKED);
+        return (daysChecked != null);
+    }
+
+    protected void startAddToScheduleActivity() {
         Intent intent = new Intent(this, AddToScheduleActivity.class);
         startActivity(intent);
+    }
+
+    protected void setPickedNotificationSchedule(Intent intent) {
+        String[] daysChecked = intent.getStringArrayExtra(AddToScheduleActivity.EXTRA_DAYS_CHECKED);
+        int hour = intent.getIntExtra(AddToScheduleActivity.EXTRA_TIME_PICKER_HOUR, 1);
+        int minute = intent.getIntExtra(AddToScheduleActivity.EXTRA_TIME_PICKER_MINUTE, 0);
+
+        TextView schedule;
+        for (String day:daysChecked) {
+            switch (day) {
+                case "Monday":
+                    schedule = findViewById(R.id.monday_schedule);
+                    break;
+                case "Tuesday":
+                    schedule = findViewById(R.id.tuesday_schedule);
+                    break;
+                default:
+                    schedule = null;
+            }
+            if (schedule != null) {
+                StringBuilder scheduleTextSB = new StringBuilder(schedule.getText());
+                scheduleTextSB.append(String.format("\n %s:%s", hour, minute));
+                schedule.setText(scheduleTextSB.toString());
+            }
+        }
     }
 }
