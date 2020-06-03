@@ -7,11 +7,20 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.text.Layout;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,8 +64,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected boolean isScheduleChanged(Intent intent) {
-        String[] daysChecked = intent.getStringArrayExtra(AddToScheduleActivity.EXTRA_DAYS_CHECKED);
-        return (daysChecked != null);
+        Object[] daysChecked = intent.getStringArrayExtra(AddToScheduleActivity.EXTRA_DAYS_CHECKED);
+        return (!Objects.equals(daysChecked, null));
     }
 
     protected void startAddToScheduleActivity() {
@@ -69,22 +78,29 @@ public class MainActivity extends AppCompatActivity {
         int hour = intent.getIntExtra(AddToScheduleActivity.EXTRA_TIME_PICKER_HOUR, 1);
         int minute = intent.getIntExtra(AddToScheduleActivity.EXTRA_TIME_PICKER_MINUTE, 0);
 
-        TextView schedule;
+        LinearLayout scheduleCardsContainer = findViewById(R.id.schedule_cards_container);
+
+        CardView scheduleCardView = null;
+
         for (String day:daysChecked) {
-            switch (day) {
-                case "Monday":
-                    schedule = findViewById(R.id.monday_schedule);
-                    break;
-                case "Tuesday":
-                    schedule = findViewById(R.id.tuesday_schedule);
-                    break;
-                default:
-                    schedule = null;
+
+            for (int i = 0; i < scheduleCardsContainer.getChildCount(); i++) {
+                String layoutDayName = getResources()
+                        .getResourceEntryName(scheduleCardsContainer.getChildAt(i).getId());
+                if (day.toLowerCase().equals(layoutDayName.toLowerCase())) {
+                    scheduleCardView = (CardView) scheduleCardsContainer.getChildAt(i);
+                }
             }
-            if (schedule != null) {
-                StringBuilder scheduleTextSB = new StringBuilder(schedule.getText());
+
+            if (scheduleCardView != null) {
+                ConstraintLayout cardInnerLayout = (ConstraintLayout) scheduleCardView.getChildAt(0);
+                int SCHEDULE_TEXTVIEW_IN_CARD_INNER_LAYOUT_INDEX = 1;
+                TextView scheduleTextView = (TextView) cardInnerLayout
+                        .getChildAt(SCHEDULE_TEXTVIEW_IN_CARD_INNER_LAYOUT_INDEX);
+
+                StringBuilder scheduleTextSB = new StringBuilder(scheduleTextView.getText());
                 scheduleTextSB.append(String.format("\n %s:%s", hour, minute));
-                schedule.setText(scheduleTextSB.toString());
+                scheduleTextView.setText(scheduleTextSB.toString());
             }
         }
     }

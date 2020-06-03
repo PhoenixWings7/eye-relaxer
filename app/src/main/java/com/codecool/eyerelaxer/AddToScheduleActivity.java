@@ -6,6 +6,8 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Parcelable;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -37,7 +39,7 @@ public class AddToScheduleActivity extends AppCompatActivity {
         // get checked days
         List<String> daysChecked = new ArrayList<>();
 
-        ScrollView checkboxContainer = findViewById(R.id.checkboxes_container);
+        LinearLayout checkboxContainer = findViewById(R.id.checkboxes_container_layout);
         for (int i = 0; i < checkboxContainer.getChildCount(); i++) {
             CheckBox checkBox = (CheckBox) checkboxContainer.getChildAt(i);
             if (checkBox.isChecked()) {
@@ -52,7 +54,7 @@ public class AddToScheduleActivity extends AppCompatActivity {
 
         // put extras
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(EXTRA_DAYS_CHECKED, daysChecked.toArray());
+        intent.putExtra(EXTRA_DAYS_CHECKED, daysChecked.toArray(new String[0]));
         intent.putExtra(EXTRA_TIME_PICKER_HOUR, hour);
         intent.putExtra(EXTRA_TIME_PICKER_MINUTE, minute);
 
