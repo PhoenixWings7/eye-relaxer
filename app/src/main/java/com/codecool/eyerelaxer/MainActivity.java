@@ -5,11 +5,14 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.os.PersistableBundle;
 import android.text.Layout;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +26,10 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String EXTRA_SCHEDULES_ARRAY ="com.codecool.eyerelaxer.SCHEDULES_ARRAY";
+    private static final String LOGCAT_TAG = "MainActivity";
+    private static final int REQUEST_CODE = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intentIncoming = getIntent();
 
+        if (savedInstanceState != null) {
+            this.onRestoreInstanceState(savedInstanceState);
+        }
         if (isScheduleChanged(intentIncoming)) {
             setPickedNotificationSchedule(intentIncoming);
         }
@@ -63,6 +73,73 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        ArrayList <String> schedules = new ArrayList<>();
+
+        LinearLayout cardsContainer = findViewById(R.id.schedule_cards_container);
+        final int insideLayoutPosition = 0;
+        final int schedulePosition = 1;
+
+        for (int i = 0; i < cardsContainer.getChildCount(); i++) {
+            String scheduleString = null;
+            try {
+                CardView card = (CardView) cardsContainer.getChildAt(i);
+                ConstraintLayout cardInsideLayout = (ConstraintLayout) card.getChildAt(insideLayoutPosition);
+                TextView daySchedule = (TextView) cardInsideLayout.getChildAt(schedulePosition);
+                scheduleString = daySchedule.getText().toString();
+
+            } catch (NullPointerException|ClassCastException e) {
+                Log.e(LOGCAT_TAG, e.getMessage() != null ? e.getMessage() : "onSaveInstanceState went wrong");
+            }
+            if (scheduleString != null) {
+                schedules.add(i, scheduleString);
+            }
+        }
+        outState.putStringArrayList(EXTRA_SCHEDULES_ARRAY, schedules);
+    }
+
+    @Override
+    public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
+        if (savedInstanceState == null) {
+            Log.e(LOGCAT_TAG, "saved state is null");
+            return;
+        }
+        super.onRestoreInstanceState(savedInstanceState);
+
+        ArrayList<String> savedSchedules = savedInstanceState.getStringArrayList(EXTRA_SCHEDULES_ARRAY);
+
+        LinearLayout cardsContainer = findViewById(R.id.schedule_cards_container);
+        final int insideLayoutPosition = 0;
+        final int schedulePosition = 1;
+
+        for (int i = 0; i < cardsContainer.getChildCount(); i++) {
+            try {
+                CardView card = (CardView) cardsContainer.getChildAt(i);
+                ConstraintLayout cardInsideLayout = (ConstraintLayout) card.getChildAt(insideLayoutPosition);
+                TextView daySchedule = (TextView) cardInsideLayout.getChildAt(schedulePosition);
+                String scheduleString = savedSchedules.get(i);
+                daySchedule.setText(scheduleString);
+
+            } catch (NullPointerException|ClassCastException e) {
+                Log.e(LOGCAT_TAG, e.getMessage() != null ? e.getMessage() : "onRestoreInstanceState went wrong");
+            }
+        }
+    }
+
+
+
     protected boolean isScheduleChanged(Intent intent) {
         Object[] daysChecked = intent.getStringArrayExtra(AddToScheduleActivity.EXTRA_DAYS_CHECKED);
         return (!Objects.equals(daysChecked, null));
@@ -70,7 +147,16 @@ public class MainActivity extends AppCompatActivity {
 
     protected void startAddToScheduleActivity() {
         Intent intent = new Intent(this, AddToScheduleActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE) {
+            setPickedNotificationSchedule(data);
+
+        }
     }
 
     protected void setPickedNotificationSchedule(Intent intent) {

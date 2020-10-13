@@ -2,19 +2,14 @@ package com.codecool.eyerelaxer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
+import android.widget.TimePicker;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.os.Parcelable;
-import android.util.Log;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TimePicker;
-
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,16 +48,13 @@ public class AddToScheduleActivity extends AppCompatActivity {
         int minute = timePicker.getMinute();
 
         // put extras
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent();
         intent.putExtra(EXTRA_DAYS_CHECKED, daysChecked.toArray(new String[0]));
         intent.putExtra(EXTRA_TIME_PICKER_HOUR, hour);
         intent.putExtra(EXTRA_TIME_PICKER_MINUTE, minute);
 
-        startAnotherActivity(intent);
-    }
-
-    void startAnotherActivity(Intent intent) {
-        startActivity(intent);
+        setResult(1, intent);
+        finish();
     }
 
 }

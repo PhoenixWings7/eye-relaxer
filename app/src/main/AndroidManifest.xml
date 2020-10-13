@@ -13,6 +13,7 @@
         <activity
             android:name=".AddToScheduleActivity"
             android:label="@string/title_activity_add_to_schedule"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="fullSensor">
 
