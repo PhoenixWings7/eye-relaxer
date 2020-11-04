@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/schedule_card_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/card_linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="@dimen/text_in_cardView_padding"
+            android:text="@string/monday"
+            android:textSize="@dimen/card_weekday_text_size"/>
+
+        <TextView
+            android:id="@+id/header_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/text_in_cardView_padding"
+            android:textSize="@dimen/schedule_text_size"
+            android:text="@string/notifications_schedule_headline"/>
+
+        <TextView
+            android:id="@+id/schedules_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/text_in_cardView_padding"
+            android:paddingRight="@dimen/text_in_cardView_padding"
+            android:paddingBottom="@dimen/text_in_cardView_padding"
+            android:textSize="@dimen/schedule_text_size"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

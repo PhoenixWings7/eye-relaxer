@@ -7,4 +7,5 @@
     <dimen name="app_message_text_size">24sp</dimen>
     <dimen name="text_in_cardView_padding">16dp</dimen>
     <dimen name="card_weekday_text_size">20sp</dimen>
+    <dimen name="schedule_text_size">16sp</dimen>
 </resources>

@@ -11,10 +11,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class AddToScheduleActivity extends AppCompatActivity {
-    public static final String EXTRA_DAYS_CHECKED = "com.codecool.eyerelaxer.DAYS_CHECKED";
+    public static final String EXTRA_DAYS_CHECKED_INDICES = "com.codecool.eyerelaxer.DAYS_CHECKED_INDICES";
     public static final String EXTRA_TIME_PICKER_HOUR = "com.codecool.eyerelaxer.TIME_PICKER_HOUR";
     public static final String EXTRA_TIME_PICKER_MINUTE = "com.codecool.eyerelaxer.TIME_PICKER_MINUTE";
 
@@ -32,16 +31,18 @@ public class AddToScheduleActivity extends AppCompatActivity {
 
     protected void setChosenTimeAndDay() {
         // get checked days
-        List<String> daysChecked = new ArrayList<>();
+        ArrayList<Integer> daysCheckedIndices = new ArrayList<>();
 
         LinearLayout checkboxContainer = findViewById(R.id.checkboxes_container_layout);
         for (int i = 0; i < checkboxContainer.getChildCount(); i++) {
             CheckBox checkBox = (CheckBox) checkboxContainer.getChildAt(i);
             if (checkBox.isChecked()) {
-                String dayChecked = checkBox.getText().toString();
-                daysChecked.add(dayChecked);
+                daysCheckedIndices.add(i);
             }
         }
+        // convert ArrayList to int[]
+        int[] extraArr = daysCheckedIndices.stream().mapToInt(i -> i).toArray();
+
         // get picked time
         TimePicker timePicker = findViewById(R.id.timePicker);
         int hour = timePicker.getHour();
@@ -49,7 +50,7 @@ public class AddToScheduleActivity extends AppCompatActivity {
 
         // put extras
         Intent intent = new Intent();
-        intent.putExtra(EXTRA_DAYS_CHECKED, daysChecked.toArray(new String[0]));
+        intent.putExtra(EXTRA_DAYS_CHECKED_INDICES, extraArr);
         intent.putExtra(EXTRA_TIME_PICKER_HOUR, hour);
         intent.putExtra(EXTRA_TIME_PICKER_MINUTE, minute);
 

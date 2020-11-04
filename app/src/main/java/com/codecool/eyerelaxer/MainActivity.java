@@ -3,32 +3,27 @@ package com.codecool.eyerelaxer;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.codecool.eyerelaxer.dao.CardDaoImplementation;
+import com.codecool.eyerelaxer.model.Card;
+import com.codecool.eyerelaxer.model.ScheduleEntry;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.PersistableBundle;
-import android.text.Layout;
-import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String EXTRA_SCHEDULES_ARRAY ="com.codecool.eyerelaxer.SCHEDULES_ARRAY";
     private static final String LOGCAT_TAG = "MainActivity";
     private static final int REQUEST_CODE = 1;
+    CardRecyclerViewAdapter recyclerViewAdapter;
+    CardDaoImplementation cardDaoImpl = CardDaoImplementation.getCardDao();
 
 
     @Override
@@ -41,13 +36,14 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.add_new_notification_time_fab);
         fab.setOnClickListener(view -> startAddToScheduleActivity());
 
-        Intent intentIncoming = getIntent();
+        // set RecyclerView
+        RecyclerView recyclerView = findViewById(R.id.schedule_cards_container);
+        recyclerViewAdapter = new CardRecyclerViewAdapter(this);
+        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         if (savedInstanceState != null) {
             this.onRestoreInstanceState(savedInstanceState);
-        }
-        if (isScheduleChanged(intentIncoming)) {
-            setPickedNotificationSchedule(intentIncoming);
         }
     }
 
@@ -84,64 +80,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        ArrayList <String> schedules = new ArrayList<>();
+    protected void onResume() {
+        super.onResume();
+        Intent intentIncoming = getIntent();
 
-        LinearLayout cardsContainer = findViewById(R.id.schedule_cards_container);
-        final int insideLayoutPosition = 0;
-        final int schedulePosition = 1;
-
-        for (int i = 0; i < cardsContainer.getChildCount(); i++) {
-            String scheduleString = null;
-            try {
-                CardView card = (CardView) cardsContainer.getChildAt(i);
-                ConstraintLayout cardInsideLayout = (ConstraintLayout) card.getChildAt(insideLayoutPosition);
-                TextView daySchedule = (TextView) cardInsideLayout.getChildAt(schedulePosition);
-                scheduleString = daySchedule.getText().toString();
-
-            } catch (NullPointerException|ClassCastException e) {
-                Log.e(LOGCAT_TAG, e.getMessage() != null ? e.getMessage() : "onSaveInstanceState went wrong");
-            }
-            if (scheduleString != null) {
-                schedules.add(i, scheduleString);
-            }
-        }
-        outState.putStringArrayList(EXTRA_SCHEDULES_ARRAY, schedules);
-    }
-
-    @Override
-    public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
-            Log.e(LOGCAT_TAG, "saved state is null");
-            return;
-        }
-        super.onRestoreInstanceState(savedInstanceState);
-
-        ArrayList<String> savedSchedules = savedInstanceState.getStringArrayList(EXTRA_SCHEDULES_ARRAY);
-
-        LinearLayout cardsContainer = findViewById(R.id.schedule_cards_container);
-        final int insideLayoutPosition = 0;
-        final int schedulePosition = 1;
-
-        for (int i = 0; i < cardsContainer.getChildCount(); i++) {
-            try {
-                CardView card = (CardView) cardsContainer.getChildAt(i);
-                ConstraintLayout cardInsideLayout = (ConstraintLayout) card.getChildAt(insideLayoutPosition);
-                TextView daySchedule = (TextView) cardInsideLayout.getChildAt(schedulePosition);
-                String scheduleString = savedSchedules.get(i);
-                daySchedule.setText(scheduleString);
-
-            } catch (NullPointerException|ClassCastException e) {
-                Log.e(LOGCAT_TAG, e.getMessage() != null ? e.getMessage() : "onRestoreInstanceState went wrong");
-            }
+        if (isScheduleChanged(intentIncoming)) {
+            updateNotificationSchedule(intentIncoming);
         }
     }
-
-
 
     protected boolean isScheduleChanged(Intent intent) {
-        Object[] daysChecked = intent.getStringArrayExtra(AddToScheduleActivity.EXTRA_DAYS_CHECKED);
+        Object[] daysChecked = intent.getStringArrayExtra(AddToScheduleActivity.EXTRA_DAYS_CHECKED_INDICES);
         return (!Objects.equals(daysChecked, null));
     }
 
@@ -154,40 +103,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE) {
-            setPickedNotificationSchedule(data);
-
+            updateNotificationSchedule(data);
         }
     }
 
-    protected void setPickedNotificationSchedule(Intent intent) {
-        String[] daysChecked = intent.getStringArrayExtra(AddToScheduleActivity.EXTRA_DAYS_CHECKED);
+    protected void updateNotificationSchedule(Intent intent) {
+        int[] daysChecked = intent.getIntArrayExtra(AddToScheduleActivity.EXTRA_DAYS_CHECKED_INDICES);
         int hour = intent.getIntExtra(AddToScheduleActivity.EXTRA_TIME_PICKER_HOUR, 1);
         int minute = intent.getIntExtra(AddToScheduleActivity.EXTRA_TIME_PICKER_MINUTE, 0);
 
-        LinearLayout scheduleCardsContainer = findViewById(R.id.schedule_cards_container);
 
-        CardView scheduleCardView = null;
+        for (int dayIndex:daysChecked) {
 
-        for (String day:daysChecked) {
+            Card scheduleCard = cardDaoImpl.getCardByIndex(dayIndex);
 
-            for (int i = 0; i < scheduleCardsContainer.getChildCount(); i++) {
-                String layoutDayName = getResources()
-                        .getResourceEntryName(scheduleCardsContainer.getChildAt(i).getId());
-                if (day.toLowerCase().equals(layoutDayName.toLowerCase())) {
-                    scheduleCardView = (CardView) scheduleCardsContainer.getChildAt(i);
-                }
+            if (scheduleCard != null) {
+                ScheduleEntry scheduleEntry = new ScheduleEntry(hour, minute);
+                cardDaoImpl.addScheduleToCard(dayIndex, scheduleEntry);
             }
-
-            if (scheduleCardView != null) {
-                ConstraintLayout cardInnerLayout = (ConstraintLayout) scheduleCardView.getChildAt(0);
-                int SCHEDULE_TEXTVIEW_IN_CARD_INNER_LAYOUT_INDEX = 1;
-                TextView scheduleTextView = (TextView) cardInnerLayout
-                        .getChildAt(SCHEDULE_TEXTVIEW_IN_CARD_INNER_LAYOUT_INDEX);
-
-                StringBuilder scheduleTextSB = new StringBuilder(scheduleTextView.getText());
-                scheduleTextSB.append(String.format("\n %s:%s", hour, minute));
-                scheduleTextView.setText(scheduleTextSB.toString());
-            }
+            recyclerViewAdapter.notifyItemChanged(dayIndex);
         }
     }
 }
