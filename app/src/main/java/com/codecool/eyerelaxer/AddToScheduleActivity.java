@@ -56,6 +56,7 @@ public class AddToScheduleActivity extends AppCompatActivity {
 
         setResult(1, intent);
         finish();
+        overridePendingTransition(R.anim.slide_in_to_right, R.anim.slide_out_to_right);
     }
 
 }

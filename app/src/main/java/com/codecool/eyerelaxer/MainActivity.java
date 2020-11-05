@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
     protected void startAddToScheduleActivity() {
         Intent intent = new Intent(this, AddToScheduleActivity.class);
         startActivityForResult(intent, REQUEST_CODE);
+        overridePendingTransition(R.anim.slide_in_to_left, R.anim.slide_out_to_left);
     }
 
     @Override
